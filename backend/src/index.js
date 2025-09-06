@@ -10,11 +10,17 @@ import authRoutes from "./routes/auth.route.js";
 import messageRoutes from "./routes/message.route.js";
 import { initSocket } from "./lib/socket.js";
 
+// ----------------------
+// Load environment variables
+// ----------------------
 dotenv.config();
 const PORT = process.env.PORT || 5000;
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 const __dirname = path.resolve();
 
+// ----------------------
+// Create Express app & HTTP server
+// ----------------------
 const app = express();
 const server = http.createServer(app);
 
@@ -37,20 +43,22 @@ app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 
 // ----------------------
-// Serve Frontend in Production
+// Serve frontend in production
 // ----------------------
 if (process.env.NODE_ENV === "production") {
   const frontendDistPath = path.join(__dirname, "../frontend/dist");
   app.use(express.static(frontendDistPath));
-  app.get("/*", (req, res) =>
-    res.sendFile(path.resolve(frontendDistPath, "index.html"))
-  );
+
+  // Catch-all route for SPA
+  app.get("/*", (req, res) => {
+    res.sendFile(path.resolve(frontendDistPath, "index.html"));
+  });
 }
 
 // ----------------------
-// Socket.io
+// Initialize Socket.io
 // ----------------------
-const { io } = initSocket(server);
+const io = initSocket(server);
 
 // ----------------------
 // Start Server
