@@ -1,14 +1,14 @@
 import { Server } from "socket.io";
 
-let io; // Singleton instance of Socket.io
+let io; // Singleton Socket.io instance
 const userSocketMap = {}; // { userId: socketId }
 
 export function initSocket(server) {
-  if (io) return io; // Prevent multiple initializations
+  if (io) return io; // prevent multiple initializations
 
   io = new Server(server, {
     cors: {
-      origin: ["http://localhost:5173"], // Add production frontend URL if needed
+      origin: ["http://localhost:5173"], // add frontend production URL if needed
       credentials: true,
     },
   });
@@ -19,7 +19,6 @@ export function initSocket(server) {
     const userId = socket.handshake.query.userId;
     if (userId) userSocketMap[userId] = socket.id;
 
-    // Broadcast current online users
     io.emit("getOnlineUsers", Object.keys(userSocketMap));
 
     socket.on("disconnect", () => {
@@ -32,10 +31,10 @@ export function initSocket(server) {
   return io;
 }
 
-// Global accessor for receiver socket ID
+// Access socket ID of a specific user
 export function getReceiverSocketId(userId) {
   return userSocketMap[userId];
 }
 
-// Optional: export io if already initialized
+// Optional: export io if needed globally
 export { io };
